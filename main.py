@@ -339,4 +339,4 @@ if __name__ == "__main__":
     print("job started")
     scheduler_report.start()
     if server_url is not None:
-        requests.get(url=server_url+f'?text=我挂了')
+        requests.get(url=server_url+f'?text=我挂了 ')

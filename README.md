@@ -1,14 +1,15 @@
-# 电子科技大学研究生健康状况自动填报
+# UESTC Health
 
 ## 免责说明
 
 注意！！！！！仅做学习使用，禁止用来瞒报打卡，违者后果自负
+Forked from https://github.com/onion-rain/uestc_health_report
 
 ## selenium以及geckodriver
 
 需要selenium模块来模拟浏览器操作，需要下载firefox浏览器的[geckodriver](https://github.com/mozilla/geckodriver/releases)。
 
-注：经测试chromedriver无法满足需求
+注：经测试chromedriver无法满足需求，猜测是拦截了chromium webdriver的某些关键字
 
 ## 配置
 
@@ -20,11 +21,15 @@
 
 personal_info_demo.py更名为personal_info.py
 
+## 功能
+
+每日打卡、每日体温上报以及宿舍校园网断网重连
+
 ## 运行
 
 ### 每日打卡
 
-程序会首先将今天的打卡完成，之后会自动在每日零时登录并打卡
+程序会首先将今天的打卡完成，之后会自动在每日零时（可更改）登录并打卡
 
 ```bash
 python main.py
