@@ -251,7 +251,7 @@ def printError(e):
     print('str(e):\t\t', str(e))
     print('repr(e):\t', repr(e))
     # Get information about the exception that is currently being handled  
-    exc_type, exc_value, exc_traceback = sys.exc_info() zz
+    exc_type, exc_value, exc_traceback = sys.exc_info()
     print('e.message:\t', exc_value)
     print("Note, object e and exc of Class %s is %s the same." % 
             (type(exc_value), ('not', '')[exc_value is e]))
@@ -326,15 +326,15 @@ def network_check(connecter):
 
 if __name__ == "__main__":
     reportor = Reportor(login_data['username'], login_data['password'])
-    conncter = Connecter(login_data['username'], login_data['password'])
+    connecter = Connecter(login_data['username'], login_data['password'])
     check_job(reportor, daily_report_data, temp_report_data)
-    network_check(conncter)
+    network_check(connecter)
     scheduler_report = BlockingScheduler()
     scheduler_report.add_job(check_job, 'cron', day='*', hour=7, minute=13, args=[
         reportor, daily_report_data, temp_report_data
     ])
-    scheduler_report.add_job(network_check, 'interval', minute=5, args=[
-        conncter
+    scheduler_report.add_job(network_check, 'interval', minutes=5, args=[
+        connecter
     ])
     print("job started")
     scheduler_report.start()
