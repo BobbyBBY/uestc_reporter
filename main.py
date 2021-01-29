@@ -5,6 +5,10 @@ import re
 from datetime import datetime
 import time
 import pickle
+import socket
+import win32api, win32con
+import sys
+import traceback
 
 from selenium import webdriver
 from personal_info import server_url, webdriver_path, daily_report_data, temp_report_data, login_data
@@ -57,6 +61,10 @@ class Reportor(object):
                 _etd2(password.value, document.getElementById("pwdDefaultEncryptSalt").value);
                 casLoginForm.submit();
             """.format(self.username, self.password)
+            '''
+            这里直接绕过了滑块验证码，滑块验证码判定结果为bool型，位置在login-wisedu_v1.0.js第196行,
+            或者function reValidateDeal内的ajax下。
+            '''
             driver.execute_script(js)
             # time.sleep(10)
         def _check():
@@ -237,13 +245,96 @@ def check_job(reportor, daily_report_data, temp_report_data):
     if server_url is not None:
         requests.get(url=server_url+f'?text={date_str}打卡完成')
 
+# 打印错误内容
+def printError(e):
+    print('str(Exception):\t', str(Exception))
+    print('str(e):\t\t', str(e))
+    print('repr(e):\t', repr(e))
+    # Get information about the exception that is currently being handled  
+    exc_type, exc_value, exc_traceback = sys.exc_info() zz
+    print('e.message:\t', exc_value)
+    print("Note, object e and exc of Class %s is %s the same." % 
+            (type(exc_value), ('not', '')[exc_value is e]))
+    print('traceback.print_exc(): ', traceback.print_exc())
+    print('traceback.format_exc():\n%s' % traceback.format_exc())
+
+# 断网重连
+class Connecter(object):
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.login_url = "http://10.253.0.235"
+        
+    def connect(self):
+        try:
+            print("disconnected logging in...\r", end="")
+            options = webdriver.firefox.options.Options()
+            options.add_argument('--headless')  # 无窗口
+            options.add_argument('--incognito')  # 无痕
+            driver = webdriver.Firefox(executable_path=webdriver_path, options=options)
+            driver.get(self.login_url)
+            time.sleep(10)
+            try:
+                driver.find_element_by_id("ctcc-login")
+                driver.find_element_by_id("username").send_keys(self.username)
+                driver.find_element_by_id("password").send_keys(self.password)
+                driver.find_element_by_id("ctcc-login").click()
+                return
+            except Exception as e:
+                print("似乎已经登录了")
+                pass
+            try:
+                driver.find_element_by_id("user_ip")
+                print("已经登录了")
+                return
+            except Exception as e:
+                print("connect 未知错误")
+                n_time = datetime.now()
+                print(n_time)
+                printError(e)
+        except Exception as e:
+            print("connect main 错误")
+            n_time = datetime.now()
+            print(n_time)
+            printError(e)
+
+
+def isNetOK(testserver):
+    s = socket.socket()
+    s.settimeout(3)
+    try:
+        status = s.connect_ex(testserver)
+        if status == 0:
+            s.close()
+            return True
+        else:
+            return False
+    except Exception as e:
+        n_time = datetime.now()
+        print("isNetOK error")
+        print(n_time)
+        printError(e)
+        return False
+
+def network_check(connecter):
+    isOK = isNetOK(('www.baidu.com',443))
+    if not isOK:
+        connecter.connect()
+    else:
+        return
 
 if __name__ == "__main__":
     reportor = Reportor(login_data['username'], login_data['password'])
+    conncter = Connecter(login_data['username'], login_data['password'])
     check_job(reportor, daily_report_data, temp_report_data)
+    network_check(conncter)
     scheduler_report = BlockingScheduler()
-    scheduler_report.add_job(check_job, 'cron', day='*', hour="0", minute="0", args=[
+    scheduler_report.add_job(check_job, 'cron', day='*', hour=7, minute=13, args=[
         reportor, daily_report_data, temp_report_data
+    ])
+    scheduler_report.add_job(network_check, 'interval', minute=5, args=[
+        conncter
     ])
     print("job started")
     scheduler_report.start()
