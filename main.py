@@ -6,7 +6,6 @@ from datetime import datetime
 import time
 import pickle
 import socket
-import win32api, win32con
 import sys
 import traceback
 
@@ -206,9 +205,9 @@ class Reportor(object):
             return self._daily_report(NEED_DATE, daily_report_data)
         except RuntimeError as e:
             # print(e)
-            push("{e}，上服务器看看我觉得我还有救")
+            push(str(e)+"，上服务器看看我觉得我还有救")
             # if server_url is not None:
-            #     requests.get(url=server_url+f'?text={e}，上服务器看看我还有救吗')
+            #     requests.get(url=server_url+f'?text=str(e)，上服务器看看我还有救吗')
             exit(0)
         except Exception:
             return 1
@@ -218,9 +217,9 @@ class Reportor(object):
             return self._temp_report(NEED_DATE, DAY_TIME, temp_report_data)
         except RuntimeError as e:
             # print(e)
-            push("{e}，上服务器看看我觉得我还有救")
+            push(str(e)+"，上服务器看看我觉得我还有救")
             # if server_url is not None:
-            #     requests.get(url=server_url+f'?text={e}，上服务器看看我还有救吗')
+            #     requests.get(url=server_url+f'?text=str(e)，上服务器看看我还有救吗')
             exit(0)
         except Exception:
             return 1
@@ -333,18 +332,26 @@ def network_check(connecter):
         return
 
 if __name__ == "__main__":
+    # 自动打卡
     reportor = Reportor(login_data['username'], login_data['password'])
-    connecter = Connecter(login_data['username'], login_data['password'])
     check_job(reportor, daily_report_data, temp_report_data)
-    network_check(connecter)
+
+    # 宿舍保持在线
+    # connecter = Connecter(login_data['username'], login_data['password'])
+    # network_check(connecter)
+
+    # 自动打卡，自动任务
     scheduler_report = BlockingScheduler()
-    scheduler_report.add_job(check_job, 'cron', day='*', hour=7, minute=13, args=[
+    scheduler_report.add_job(check_job, 'cron', day='*', hour=7, minute=11, args=[
         reportor, daily_report_data, temp_report_data
     ])
-    scheduler_report.add_job(network_check, 'interval', minutes=5, args=[
-        connecter
-    ])
-    print("job started")
+
+    # 宿舍保持在线，自动任务
+    # scheduler_report.add_job(network_check, 'interval', minutes=5, args=[
+    #     connecter
+    # ])
+    print("uestc_health \njob started")
+    push("uestc_health \njob started")
     scheduler_report.start()
     push("我挂了")
     # if server_url is not None:
