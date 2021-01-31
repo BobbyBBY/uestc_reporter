@@ -10,6 +10,7 @@ import win32api, win32con
 import sys
 import traceback
 
+from push_server import push
 from selenium import webdriver
 from personal_info import server_url, webdriver_path, daily_report_data, temp_report_data, login_data
 
@@ -88,8 +89,9 @@ class Reportor(object):
             _login(i+1)
             if _check():
                 return
-        if server_url is not None:
-            requests.get(url=server_url+f'?text=登陆失败，上服务器看看我觉得我还有救')
+        push("登陆失败，上服务器看看我觉得我还有救")
+        # if server_url is not None:
+        #     requests.get(url=server_url+f'?text=登陆失败，上服务器看看我觉得我还有救')
         raise RuntimeError("登录失败")
 
     def _daily_report(self, NEED_DATE, daily_report_data):
@@ -203,9 +205,10 @@ class Reportor(object):
         try:
             return self._daily_report(NEED_DATE, daily_report_data)
         except RuntimeError as e:
-            print(e)
-            if server_url is not None:
-                requests.get(url=server_url+f'?text={e}，上服务器看看我还有救吗')
+            # print(e)
+            push("{e}，上服务器看看我觉得我还有救")
+            # if server_url is not None:
+            #     requests.get(url=server_url+f'?text={e}，上服务器看看我还有救吗')
             exit(0)
         except Exception:
             return 1
@@ -214,9 +217,10 @@ class Reportor(object):
         try:
             return self._temp_report(NEED_DATE, DAY_TIME, temp_report_data)
         except RuntimeError as e:
-            print(e)
-            if server_url is not None:
-                requests.get(url=server_url+f'?text={e}，上服务器看看我还有救吗')
+            # print(e)
+            push("{e}，上服务器看看我觉得我还有救")
+            # if server_url is not None:
+            #     requests.get(url=server_url+f'?text={e}，上服务器看看我还有救吗')
             exit(0)
         except Exception:
             return 1
@@ -242,8 +246,9 @@ def check_job(reportor, daily_report_data, temp_report_data):
     reportor.login()
     for id in range(len(daily_report_data)):
         date_str = daily_check(reportor, daily_report_data[id], temp_report_data[id])
-    if server_url is not None:
-        requests.get(url=server_url+f'?text={date_str}打卡完成')
+    push(date_str + " 打卡完成")
+    # if server_url is not None:
+    #     requests.get(url=server_url+f'?text={date_str}打卡完成')
 
 # 打印错误内容
 def printError(e):
@@ -252,11 +257,14 @@ def printError(e):
     print('repr(e):\t', repr(e))
     # Get information about the exception that is currently being handled  
     exc_type, exc_value, exc_traceback = sys.exc_info()
+    print('e.type:\t', exc_type)
     print('e.message:\t', exc_value)
+    print('e.traceback:\t', exc_traceback)
     print("Note, object e and exc of Class %s is %s the same." % 
             (type(exc_value), ('not', '')[exc_value is e]))
     print('traceback.print_exc(): ', traceback.print_exc())
     print('traceback.format_exc():\n%s' % traceback.format_exc())
+    push(exc_value + "\n" + exc_value + "\n" + exc_traceback)
 
 # 断网重连
 class Connecter(object):
@@ -338,5 +346,6 @@ if __name__ == "__main__":
     ])
     print("job started")
     scheduler_report.start()
-    if server_url is not None:
-        requests.get(url=server_url+f'?text=我挂了 ')
+    push("我挂了")
+    # if server_url is not None:
+    #     requests.get(url=server_url+f'?text=我挂了 ')
