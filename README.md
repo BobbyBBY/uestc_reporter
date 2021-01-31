@@ -8,6 +8,7 @@ Forked from https://github.com/onion-rain/uestc_health_report
 ## selenium以及geckodriver
 
 需要selenium模块来模拟浏览器操作，需要下载firefox浏览器的[geckodriver](https://github.com/mozilla/geckodriver/releases)。
+经测试，在windows、linux（包括命令行）下使用firefox都没有问题
 
 注：经测试chromedriver无法满足需求，猜测是拦截了chromium webdriver的某些关键字
 
@@ -23,7 +24,13 @@ personal_info_demo.py更名为personal_info.py
 
 ## 功能
 
-每日打卡、每日体温上报以及宿舍校园网断网重连
+每日打卡  
+
+每日体温上报  
+
+宿舍校园网断线重连  
+
+阿里云邮件推送配置  
 
 ## 运行
 

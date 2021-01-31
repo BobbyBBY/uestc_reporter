@@ -2,6 +2,28 @@
 
 server_url = None  # 推送服务器url
 
+push_email_server = {
+    # 推送域名
+    "EMAIL_FROM":"",
+    # 密码
+    "EMAIL_HOST_PASSWORD":"",
+
+    "EMAIL_HOST":"smtpdm.aliyun.com",
+    "EMAIL_PORT":80,
+}
+
+push_email_list = [{
+    # 收件地址
+    "mail":"",
+    # 邮件标题
+    "title":"",
+},
+# {
+#     "mail":"",
+#     "title":"",
+# },
+]
+
 webdriver_path = r"D:/geckodriver.exe"
 
 daily_report_data = [{
