@@ -9,7 +9,7 @@ import socket
 import sys
 import traceback
 
-from push_server import push
+from push_server import push, push_error
 from selenium import webdriver
 from personal_info import server_url, webdriver_path, daily_report_data, temp_report_data, login_data
 
@@ -66,7 +66,7 @@ class Reportor(object):
             或者function reValidateDeal内的ajax下。
             '''
             driver.execute_script(js)
-            # time.sleep(10)
+            # time.sleep(3)
         def _check():
             """return 1 为检测登陆成功"""
             try:
@@ -88,7 +88,7 @@ class Reportor(object):
             _login(i+1)
             if _check():
                 return
-        push("登陆失败，上服务器看看我觉得我还有救")
+        push_error("登陆失败，上服务器看看我觉得我还有救")
         # if server_url is not None:
         #     requests.get(url=server_url+f'?text=登陆失败，上服务器看看我觉得我还有救')
         raise RuntimeError("登录失败")
@@ -205,7 +205,7 @@ class Reportor(object):
             return self._daily_report(NEED_DATE, daily_report_data)
         except RuntimeError as e:
             # print(e)
-            push(str(e)+"，上服务器看看我觉得我还有救")
+            push_error(str(e)+"，上服务器看看我觉得我还有救")
             # if server_url is not None:
             #     requests.get(url=server_url+f'?text=str(e)，上服务器看看我还有救吗')
             exit(0)
@@ -217,7 +217,7 @@ class Reportor(object):
             return self._temp_report(NEED_DATE, DAY_TIME, temp_report_data)
         except RuntimeError as e:
             # print(e)
-            push(str(e)+"，上服务器看看我觉得我还有救")
+            push_error(str(e)+"，上服务器看看我觉得我还有救")
             # if server_url is not None:
             #     requests.get(url=server_url+f'?text=str(e)，上服务器看看我还有救吗')
             exit(0)
@@ -231,11 +231,11 @@ def daily_check(reportor, daily_report_data, temp_report_data, date_str=None):
     # 平安打卡
     while(reportor.daily_report(date_str, daily_report_data)):
         continue
-    # 体温上报
-    r_value_list = []
-    for id in range(1, 4):
-        while(id not in r_value_list):
-            r_value_list.append(reportor.temp_report(date_str, str(id), temp_report_data))
+    # 体温上报 暂时关闭
+    # r_value_list = []
+    # for id in range(1, 4):
+    #     while(id not in r_value_list):
+    #         r_value_list.append(reportor.temp_report(date_str, str(id), temp_report_data))
     # 四项打卡全部完成
     print("{} day {} report complete!\n".format(daily_report_data["USER_NAME"], date_str))
     return date_str
@@ -263,7 +263,7 @@ def printError(e):
             (type(exc_value), ('not', '')[exc_value is e]))
     print('traceback.print_exc(): ', traceback.print_exc())
     print('traceback.format_exc():\n%s' % traceback.format_exc())
-    push(exc_value + "\n" + exc_value + "\n" + exc_traceback)
+    push_error(str(exc_value) + "\n" + (exc_traceback))
 
 # 断网重连
 class Connecter(object):
@@ -332,27 +332,45 @@ def network_check(connecter):
         return
 
 if __name__ == "__main__":
-    # 自动打卡
-    reportor = Reportor(login_data['username'], login_data['password'])
-    check_job(reportor, daily_report_data, temp_report_data)
+    try:
+        # 自动打卡
+        reportor = Reportor(login_data['username'], login_data['password'])
+        check_job(reportor, daily_report_data, temp_report_data)
 
-    # 宿舍保持在线
-    # connecter = Connecter(login_data['username'], login_data['password'])
-    # network_check(connecter)
+        # 宿舍网络保持在线
+        # connecter = Connecter(login_data['username'], login_data['password'])
+        # network_check(connecter)
 
-    # 自动打卡，自动任务
-    scheduler_report = BlockingScheduler()
-    scheduler_report.add_job(check_job, 'cron', day='*', hour=7, minute=11, args=[
-        reportor, daily_report_data, temp_report_data
-    ])
+        # 自动打卡，自动任务
+        scheduler_report = BlockingScheduler()
+        scheduler_report.add_job(check_job, 'cron', day='*', hour=7, minute=11, args=[
+            reportor, daily_report_data, temp_report_data
+        ])
 
-    # 宿舍保持在线，自动任务
-    # scheduler_report.add_job(network_check, 'interval', minutes=5, args=[
-    #     connecter
-    # ])
-    print("uestc_health \njob started")
-    push("uestc_health \njob started")
-    scheduler_report.start()
-    push("我挂了")
-    # if server_url is not None:
-    #     requests.get(url=server_url+f'?text=我挂了 ')
+        # 宿舍保持在线，自动任务
+        # scheduler_report.add_job(network_check, 'interval', minutes=5, args=[
+        #     connecter
+        # ])
+
+        print("uestc_health \njob started")
+        push("uestc_health \njob started")
+        scheduler_report.start()
+    except Exception as e:
+        error_message = ""
+        error_message += str(Exception)
+        error_message += "\n"
+        error_message += str(e)
+        error_message += "\n"
+        error_message += repr(e)
+        error_message += "\n"
+        exc_type, exc_value, exc_traceback = sys.exc_info() 
+        error_message += str(exc_value) # e.message
+        error_message += "\n"
+        error_message += str(traceback.print_exc())
+        error_message += "\n"
+        error_message += str(traceback.format_exc())
+        error_message += "\n"
+        push_error(error_message)
+        # if server_url is not None:
+        #     requests.get(url=server_url+f'?text=我挂了 ')
+    
