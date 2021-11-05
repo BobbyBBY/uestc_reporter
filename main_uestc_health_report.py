@@ -15,23 +15,21 @@ from personal_info import server_url, webdriver_path, daily_report_data, temp_re
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-
 headers = {
     "Cookie": ""
 }
 
 
 def cookies2str(cookies):
-    cookie = [item["name"]+"="+item["value"] for item in cookies]
+    cookie = [item["name"] + "=" + item["value"] for item in cookies]
     cookiestr = ';'.join(item for item in cookie)
     return cookiestr
 
 
 class Reportor(object):
 
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+    def __init__(self, login_data):
+        self.login_data = login_data
         self.host = "eportal.uestc.edu.cn"
         self.login_url = "http://eportal.uestc.edu.cn/jkdkapp/sys/lwReportEpidemicStu/index.do?#/dailyReport"
         self.wid_url = '/jkdkapp/sys/lwReportEpidemicStu/modules/dailyReport/getMyTodayReportWid.do?'
@@ -39,17 +37,21 @@ class Reportor(object):
         self.daily_report_save_url = "/jkdkapp/sys/lwReportEpidemicStu/modules/dailyReport/T_REPORT_EPIDEMIC_CHECKIN_YJS_SAVE.do?"
         self.temp_report_check_url = "/jkdkapp/sys/lwReportEpidemicStu/mobile/tempReport/getMyTempReportDatas.do?"
         self.temp_report_save_url = "/jkdkapp/sys/lwReportEpidemicStu/mobile/tempReport/T_REPORT_TEMPERATURE_YJS_SAVE.do?"
-        
-    def login(self):
+
+    def login(self, user):
+        self.username = self.login_data[user]['username']
+        self.password = self.login_data[user]['password']
         print("logging in...\r", end="")
         options = webdriver.firefox.options.Options()
         options.add_argument('--headless')  # 无窗口
         options.add_argument('--incognito')  # 无痕
         driver = webdriver.Firefox(executable_path=webdriver_path, options=options)
+
         def update_cookies():
             Cookies = driver.get_cookies()
             driver.quit()
             headers["Cookie"] = cookies2str(Cookies)
+
         def _login(i):
             print("第{}次尝试登录".format(i))
             js = """
@@ -67,6 +69,7 @@ class Reportor(object):
             '''
             driver.execute_script(js)
             # time.sleep(3)
+
         def _check():
             """return 1 为检测登陆成功"""
             try:
@@ -80,12 +83,13 @@ class Reportor(object):
                 print("登录账号 ： {}".format(username))
                 update_cookies()
                 return 1
+
         for i in range(10):  # 重复尝试登陆十次
             driver.get(self.login_url)
             time.sleep(3)
             if _check():
                 return
-            _login(i+1)
+            _login(i + 1)
             if _check():
                 return
         push_error("登陆失败，上服务器看看我觉得我还有救")
@@ -104,7 +108,7 @@ class Reportor(object):
         if re.search("<title>统一身份认证</title>", res):
             raise RuntimeError("Cookie失效")
         elif re.search("<title>302 Found</title>", res):
-            raise RuntimeError("Cookie失效") 
+            raise RuntimeError("Cookie失效")
         try:
             wid_json_loads = json.loads(res)
             wid = wid_json_loads['datas']['getMyTodayReportWid']['rows'][0]['WID']
@@ -125,7 +129,7 @@ class Reportor(object):
         if re.search("<title>统一身份认证</title>", res):
             raise RuntimeError("Cookie失效")
         elif re.search("<title>302 Found</title>", res):
-            raise RuntimeError("Cookie失效") 
+            raise RuntimeError("Cookie失效")
         try:
             parsed_res = json.loads(res)
         except json.decoder.JSONDecodeError:
@@ -141,13 +145,13 @@ class Reportor(object):
         # save
         daily_report_data.update({
             "NEED_CHECKIN_DATE": NEED_DATE,
-            "CZRQ": NEED_DATE+" 00:00:00",
+            "CZRQ": NEED_DATE + " 00:00:00",
         })
         res = get_request(self.host, "POST", self.daily_report_save_url, daily_report_data, headers)
         if re.search("<title>统一身份认证</title>", res):
             raise RuntimeError("Cookie失效")
         elif re.search("<title>302 Found</title>", res):
-            raise RuntimeError("Cookie失效") 
+            raise RuntimeError("Cookie失效")
         try:
             parsed_res = json.loads(res)
         except json.decoder.JSONDecodeError:
@@ -170,7 +174,7 @@ class Reportor(object):
         if re.search("<title>统一身份认证</title>", res):
             raise RuntimeError("Cookie失效")
         elif re.search("<title>302 Found</title>", res):
-            raise RuntimeError("Cookie失效") 
+            raise RuntimeError("Cookie失效")
         if re.search('"NEED_DATE":"{}","DAY_TIME":"{}"'.format(NEED_DATE, DAY_TIME), res) is not None:
             print("temp report {} has finished".format(DAY_TIME))
             return int(DAY_TIME)
@@ -191,7 +195,7 @@ class Reportor(object):
         if re.search("<title>统一身份认证</title>", res):
             raise RuntimeError("Cookie失效")
         elif re.search("<title>302 Found</title>", res):
-            raise RuntimeError("Cookie失效") 
+            raise RuntimeError("Cookie失效")
         try:
             assert re.search(r'"T_REPORT_TEMPERATURE_YJS_SAVE":(?P<r_value>\d)', res)["r_value"] == '1'
             print("temp report {} sucessful".format(DAY_TIME))
@@ -205,7 +209,7 @@ class Reportor(object):
             return self._daily_report(NEED_DATE, daily_report_data)
         except RuntimeError as e:
             # print(e)
-            push_error(str(e)+"，上服务器看看我觉得我还有救")
+            push_error(str(e) + "，上服务器看看我觉得我还有救")
             # if server_url is not None:
             #     requests.get(url=server_url+f'?text=str(e)，上服务器看看我还有救吗')
             exit(0)
@@ -217,19 +221,20 @@ class Reportor(object):
             return self._temp_report(NEED_DATE, DAY_TIME, temp_report_data)
         except RuntimeError as e:
             # print(e)
-            push_error(str(e)+"，上服务器看看我觉得我还有救")
+            push_error(str(e) + "，上服务器看看我觉得我还有救")
             # if server_url is not None:
             #     requests.get(url=server_url+f'?text=str(e)，上服务器看看我还有救吗')
             exit(0)
         except Exception:
             return 1
 
+
 def daily_check(reportor, daily_report_data, temp_report_data, date_str=None):
     if date_str is None:
         date_str = datetime.now().strftime("%Y-%m-%d")
         print("当前时间：" + str(datetime.now()))
     # 平安打卡
-    while(reportor.daily_report(date_str, daily_report_data)):
+    while (reportor.daily_report(date_str, daily_report_data)):
         continue
     # 体温上报 暂时关闭
     # r_value_list = []
@@ -242,12 +247,14 @@ def daily_check(reportor, daily_report_data, temp_report_data, date_str=None):
 
 
 def check_job(reportor, daily_report_data, temp_report_data):
-    reportor.login()
-    for id in range(len(daily_report_data)):
-        date_str = daily_check(reportor, daily_report_data[id], temp_report_data[id])
+    date_str = "plain"
+    for user in range(len(daily_report_data)):
+        reportor.login(user)
+        date_str = daily_check(reportor, daily_report_data[user], temp_report_data[user])
     push(date_str + " 打卡完成")
     # if server_url is not None:
     #     requests.get(url=server_url+f'?text={date_str}打卡完成')
+
 
 # 打印错误内容
 def printError(e):
@@ -259,11 +266,12 @@ def printError(e):
     print('e.type:\t', exc_type)
     print('e.message:\t', exc_value)
     print('e.traceback:\t', exc_traceback)
-    print("Note, object e and exc of Class %s is %s the same." % 
-            (type(exc_value), ('not', '')[exc_value is e]))
+    print("Note, object e and exc of Class %s is %s the same." %
+          (type(exc_value), ('not', '')[exc_value is e]))
     print('traceback.print_exc(): ', traceback.print_exc())
     print('traceback.format_exc():\n%s' % traceback.format_exc())
     push_error(str(exc_value) + "\n" + (exc_traceback))
+
 
 # 断网重连
 class Connecter(object):
@@ -272,7 +280,7 @@ class Connecter(object):
         self.username = username
         self.password = password
         self.login_url = "http://10.253.0.235"
-        
+
     def connect(self):
         try:
             print("disconnected logging in...\r", end="")
@@ -324,17 +332,19 @@ def isNetOK(testserver):
         printError(e)
         return False
 
+
 def network_check(connecter):
-    isOK = isNetOK(('www.baidu.com',443))
+    isOK = isNetOK(('www.baidu.com', 443))
     if not isOK:
         connecter.connect()
     else:
         return
 
+
 if __name__ == "__main__":
     try:
         # 自动打卡
-        reportor = Reportor(login_data['username'], login_data['password'])
+        reportor = Reportor(login_data)
         check_job(reportor, daily_report_data, temp_report_data)
 
         # 宿舍网络保持在线
@@ -363,8 +373,8 @@ if __name__ == "__main__":
         error_message += "\n"
         error_message += repr(e)
         error_message += "\n"
-        exc_type, exc_value, exc_traceback = sys.exc_info() 
-        error_message += str(exc_value) # e.message
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        error_message += str(exc_value)  # e.message
         error_message += "\n"
         error_message += str(traceback.print_exc())
         error_message += "\n"
@@ -373,4 +383,3 @@ if __name__ == "__main__":
         push_error(error_message)
         # if server_url is not None:
         #     requests.get(url=server_url+f'?text=我挂了 ')
-    

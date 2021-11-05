@@ -1,4 +1,5 @@
 #  这里修改为你自己的信息，注释下的都需要修改
+# 多人打卡逻辑为登陆一个账号，打一次卡，请注意list顺序
 
 server_url = None  # 推送服务器url
 
@@ -102,9 +103,14 @@ for i in range(len(daily_report_data)):
     temp_report_data[i]['DEPT_CODE'] = daily_report_data[i]['DEPT_CODE']
     temp_report_data[i]['WID'] = daily_report_data[i]['WID']
 
-login_data = {
+login_data = [
+{
     # 学号
     "username":'',
     # 密码
     "password":'',
-}
+},
+# {
+#     # 若要添加打卡人在此添加
+# },
+]
