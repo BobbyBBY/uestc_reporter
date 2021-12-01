@@ -14,23 +14,25 @@ Forked from https://github.com/onion-rain/uestc_health_report
 
 ## 配置
 
-配置python环境：`pip install -r requirements.txt`
+配置python环境：`pip install -r requirements.txt`  
 
-修改personal_info_demo.py中的webdriver_path的值为你的电脑上geckodriver所在位置。
+修改personal_info_demo.py中的webdriver_path的值为你的电脑上geckodriver所在位置。  
 
-根据personal_info_demo.py添加自己的信息
+根据personal_info_demo.py添加自己的信息  
 
-personal_info_demo.py更名为personal_info.py
+将personal_info_demo.py更名为personal_info.py  
 
 ## 功能
 
 每日打卡  
 
-每日体温上报  
+每日体温上报【已停用】  
 
-宿舍校园网断线重连  
+宿舍校园网断线重连【已停用】  
 
 阿里云邮件推送配置  
+
+滑块验证码的破解  
 
 ## 运行
 
@@ -43,14 +45,6 @@ python main.py
 ```
 ![效果图](readme_imgs/2.jpg)
 
-### 一劳永逸
-
-注意：未来体温填报经测试成功，但未来打卡未测试
-
-```bash
-python once_for_all.py
-```
-![效果图](readme_imgs/5.jpg)
 
 ## 实现思路
 通过chrome的develop tools的network面板在每日打卡填报时候进行抓包，找到进行每日报平安以及体温上报的api。
@@ -66,14 +60,14 @@ python once_for_all.py
   
 + 对于每日报平安的api，也是可以多次报平安，但页面上只显示最近的一次。故猜测后端有两种可能的实现方式，一是当天重复打卡的会覆盖掉上一次的，二是也是打卡无限次，但前端做了处理，只显示当天最近的一次打卡。
 
-- [x] 每日三次体温上报、每日报平安均支持已打卡检测，避免重复打卡
-
-## 待实现
-
-- [ ] 滑块验证码的破解
++ 通过边缘检测获取缺口边缘，再计算滑块需要滑动的距离，调用验证接口后，将验证结果加入提交表单中
 
 ## 版本说明
 
 main.py(v1.0) 无浏览器页面打开，绕过验证码自动登录，定时打卡
 
 cv_main.py(未完成) 模拟手动滑动验证码登录
+
+一人登陆多人打卡bug已修复，改为登陆一人打卡一次
+
+绕过滑块验证码的漏洞已修复，现加入边缘检测破解算法

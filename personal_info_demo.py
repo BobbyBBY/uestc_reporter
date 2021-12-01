@@ -1,4 +1,4 @@
-#  这里修改为你自己的信息，注释下的都需要修改
+# 这里修改为你自己的信息，注释下的都需要修改
 # 多人打卡逻辑为登陆一个账号，打一次卡，请注意list顺序
 
 server_url = None  # 推送服务器url
@@ -81,6 +81,8 @@ daily_report_data = [{
     "IS_SEE_DOCTOR": "NO",
     "IS_IN_SCHOOL_DISPLAY": "是",
     "IS_IN_SCHOOL": "1",
+    "TF_HEALTH_CODE":"1", # 天府健康通，1表示“绿码”，其余情况不确定，猜测是2、3
+    "VACCINATION":"1", # 疫苗接种情况，1表示“以全程接种”，其余情况不确定，猜测是2、3、4
     "MEMBER_HEALTH_STATUS_CODE_DISPLAY": "正常",
     "MEMBER_HEALTH_STATUS_CODE": "001",
     "MEMBER_HEALTH_UNSUAL_CODE_DISPLAY": "",

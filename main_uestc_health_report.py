@@ -8,6 +8,7 @@ import pickle
 import socket
 import sys
 import traceback
+import slider
 
 from push_server import push, push_error
 from selenium import webdriver
@@ -43,8 +44,8 @@ class Reportor(object):
         self.password = self.login_data[user]['password']
         print("logging in...\r", end="")
         options = webdriver.firefox.options.Options()
-        options.add_argument('--headless')  # 无窗口
-        options.add_argument('--incognito')  # 无痕
+        # options.add_argument('--headless')  # 无窗口
+        # options.add_argument('--incognito')  # 无痕
         driver = webdriver.Firefox(executable_path=webdriver_path, options=options)
 
         def update_cookies():
@@ -52,24 +53,90 @@ class Reportor(object):
             driver.quit()
             headers["Cookie"] = cookies2str(Cookies)
 
+        # def _login(i):
+        #     print("第{}次尝试登录".format(i))
+        #     js = """
+        #         var casLoginForm = document.getElementById("casLoginForm");
+        #         var username = document.getElementById("username");
+        #         var password = document.getElementById("password");
+        #         username.value = "{}"
+        #         password.value = "{}"
+        #         _etd2(password.value, document.getElementById("pwdDefaultEncryptSalt").value);
+        #     """.format(self.username, self.password)
+        #     '''
+        #     这里直接绕过了滑块验证码，位置在login-wisedu_v1.0.js第177行,本来需要验证滑动滑块后的一个值，但是不添加该字段也能登陆
+        #     2020/11/30 新增 需要验证滑动滑块后的一个值
+        #     '''
+        #     driver.execute_script(js)
+        #     time.sleep(3)
+        #     js = """
+        #         casLoginForm.submit();
+        #     """
+        #     driver.execute_script(js)
+        #     time.sleep(3)
+
         def _login(i):
             print("第{}次尝试登录".format(i))
-            js = """
-                var casLoginForm = document.getElementById("casLoginForm");
-                var username = document.getElementById("username");
-                var password = document.getElementById("password");
-                username.value = "{}"
-                password.value = "{}"
-                _etd2(password.value, document.getElementById("pwdDefaultEncryptSalt").value);
-                casLoginForm.submit();
-            """.format(self.username, self.password)
-            '''
-            这里直接绕过了滑块验证码，滑块验证码判定结果为bool型，位置在login-wisedu_v1.0.js第196行,
-            或者function reValidateDeal内的ajax下。
-            '''
-            driver.execute_script(js)
-            # time.sleep(3)
+            # 输入账户、密码，点击登陆按钮，激活滑块验证
+            try:
+                js = """
+                    var casLoginForm = document.getElementById("casLoginForm");
+                    var username = document.getElementById("username");
+                    var password = document.getElementById("password");
+                    username.value = "{}"
+                    password.value = "{}"
+                    _etd2(password.value, document.getElementById("pwdDefaultEncryptSalt").value);
+                    login_button = $(".auth_login_btn").filter(".primary").filter(".full_width")
+                    login_button.click()
+                """.format(self.username, self.password)
+                driver.execute_script(js)
+                time.sleep(3)
 
+                # 获取滑块验证的两个图片
+                bigImg_base64 = driver.find_element_by_id('img1').get_attribute('src')
+                smallImg_base64 = driver.find_element_by_id('img2').get_attribute('src')
+                # 计算滑块需要滑动的距离
+                moveLengthScale = slider.findSliderX(bigImg_base64, smallImg_base64)
+                # 应该动态获取幕布宽度，但其实写死了
+                # canvasLength = 
+                canvasLength = 280
+                moveLength = round(280 * moveLengthScale)
+                # print("moveLength " +str(moveLength))
+                # 向验证服务器发送答案，获得验证结果sign
+                # casLoginForm加入sign后，提交表单
+                js1 = """
+                    var sign = ""
+                    var verifySliderImageCode =function (canvasLength,moveLength) {
+                        $.ajax({
+                            url: "verifySliderImageCode.do",
+                            dataType: 'json',
+                            data: {
+                                "canvasLength": canvasLength,
+                                "moveLength": moveLength
+                            },
+                            success: function (data) {
+                                console.log(data)
+                                sign = data.sign
+                                var casLoginForm = $("#casLoginForm");
+                                var signInput=$("<input type='hidden' name='sign'/>");
+                                signInput.attr("value", sign);
+                                casLoginForm.append(signInput);
+                                casLoginForm.submit();
+                            }
+                        })
+                    };
+                """
+                js2 = """ 
+                    verifySliderImageCode({},{})
+                """.format(canvasLength, moveLength)
+                js = js1 +js2
+                driver.execute_script(js)
+                time.sleep(3)
+            except Exception as e:
+                # printError(e)
+                # 平均需要验证2次，如果验证失败，返回的data里没有sign
+                pass
+        
         def _check():
             """return 1 为检测登陆成功"""
             try:
@@ -77,7 +144,7 @@ class Reportor(object):
                 time.sleep(2)
                 username = driver.find_element_by_xpath('/html/body/div[5]/div[2]/div[1]').text
             except Exception:
-                time.sleep(10)
+                time.sleep(5)
                 return 0
             else:
                 print("登录账号 ： {}".format(username))
