@@ -44,8 +44,8 @@ class Reportor(object):
         self.password = self.login_data[user]['password']
         print("logging in...\r", end="")
         options = webdriver.firefox.options.Options()
-        # options.add_argument('--headless')  # 无窗口
-        # options.add_argument('--incognito')  # 无痕
+        options.add_argument('--headless')  # 无窗口
+        options.add_argument('--incognito')  # 无痕
         driver = webdriver.Firefox(executable_path=webdriver_path, options=options)
 
         def update_cookies():

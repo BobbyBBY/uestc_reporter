@@ -16,8 +16,10 @@ push_email_server = {
 push_email_list = [{
     # 收件地址
     "mail":"",
-    # 邮件标题
-    "title":"",
+    # 普通邮件标题
+    "push":"UESTC health 服务器日常推送",
+    # 异常邮件标题
+    "error":"UESTC health 服务器异常",
 },
 # {
 #     "mail":"",
@@ -25,6 +27,7 @@ push_email_list = [{
 # },
 ]
 
+# webdriver_path为你的电脑上geckodriver的所在位置
 webdriver_path = r"D:/geckodriver.exe"
 
 daily_report_data = [{

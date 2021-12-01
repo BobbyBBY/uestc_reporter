@@ -14,9 +14,7 @@ Forked from https://github.com/onion-rain/uestc_health_report
 
 ## 配置
 
-配置python环境：`pip install -r requirements.txt`  
-
-修改personal_info_demo.py中的webdriver_path的值为你的电脑上geckodriver所在位置。  
+配置python环境：conda env create -f environment.yml
 
 根据personal_info_demo.py添加自己的信息  
 
@@ -60,7 +58,7 @@ python main.py
   
 + 对于每日报平安的api，也是可以多次报平安，但页面上只显示最近的一次。故猜测后端有两种可能的实现方式，一是当天重复打卡的会覆盖掉上一次的，二是也是打卡无限次，但前端做了处理，只显示当天最近的一次打卡。
 
-+ 通过边缘检测获取缺口边缘，再计算滑块需要滑动的距离，调用验证接口后，将验证结果加入提交表单中
++ 通过边缘检测获取缺口边缘，再计算滑块需要滑动的距离，调用验证接口后，将验证结果加入提交表单中。不太完美，平均需要尝试两次。
 
 ## 版本说明
 
