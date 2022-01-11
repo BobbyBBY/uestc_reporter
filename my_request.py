@@ -1,17 +1,17 @@
 import urllib
 import http.client
 
+
 def get_request(host, method, url, data, headers):
     data = urllib.parse.urlencode(data)
     conn = http.client.HTTPSConnection(host)
-    payload = ''
-    _url = url+data
+    payload = ""
+    _url = url + data
     conn.request(method, _url, payload, headers)
     res = conn.getresponse()
     data = res.read().decode("utf-8")
     # print(data)
     return data
-
 
 
 # import requests

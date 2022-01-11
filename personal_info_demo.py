@@ -1,7 +1,5 @@
 # 这里修改为你自己的信息，注释下的都需要修改
-# 多人打卡逻辑为登陆一个账号，打一次卡，请注意list顺序
-
-server_url = None  # 推送服务器url
+# 多人打卡逻辑为登录一个账号，打一次卡，请注意list顺序
 
 push_email_server = {
     # 推送域名
@@ -119,3 +117,55 @@ login_data = [
 #     # 若要添加打卡人在此添加
 # },
 ]
+
+# 宿舍有线网登录账号
+dormnet_login_data = [
+{
+    # 学号
+    "username":'',
+    # 密码
+    "password":'',
+    # 服务商 China Mobile:中国移动 China Telecom:电信
+    "service":'',
+},
+# {
+#     # 按目前逻辑，只需要登录一个人的账号就可以用网了
+# },
+]
+
+# 校园无线网登录账号
+campusnet_login_data = [
+{
+    # 学号
+    "username":'',
+    # 密码
+    "password":'',
+},
+# {
+#     # 按目前逻辑，只需要登录一个人的账号就可以用网了
+# },
+]
+
+# 首选项
+preferences = {
+    # 浏览器无痕
+    "incognito_flag":True ,
+    # 浏览器无窗口
+    "headless_flag":True ,
+    # 是否发送邮件
+    "email_flag":False ,
+    # 每日平安打卡
+    "daily_report_flag":True ,
+    # 每日体温上报
+    "temp_report_flag":False ,
+    # 自动打卡
+    "report_flag":True ,
+    # 校园无线网断网重连
+    "campusnet_flag":True ,
+    # 宿舍有线网断网重连
+    "dormnet_flag":False ,
+    # 每日打卡时间-小时
+    "report_hour":9 ,
+    # 每日打卡时间-分钟
+    "report_min":13 ,
+}

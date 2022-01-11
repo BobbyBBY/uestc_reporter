@@ -9,3 +9,6 @@ front.png
 test.py
 test.js
 cache
+*.log
+*.sh
+*.bat
