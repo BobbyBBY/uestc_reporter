@@ -79,4 +79,3 @@ dependencies:
     - torchsummary==1.5.1
     - typed-ast==1.4.2
     - wrapt==1.12.1
-prefix: C:\Users\76449\.conda\envs\slider

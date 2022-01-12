@@ -19,44 +19,29 @@ Forked from https://github.com/onion-rain/uestc_health_report
 * 打卡自动化  
 * 宿舍有线网、校园无线网守护  
 
-## selenium以及geckodriver
 
-* 需要selenium模块来模拟浏览器操作
-* 需要下载firefox浏览器的[geckodriver](https://github.com/mozilla/geckodriver/releases)。
+
+---
+
+# 配置
+
+## geckodriver
+
+* 需要下载firefox浏览器的[geckodriver](https://github.com/mozilla/geckodriver/releases)  
+* 根据自己的操作系统，下载对应的.gz或.zip文件，解压后放进项目文件夹
 * 经测试，在windows、linux（包括命令行，即浏览器无窗口模式）下使用firefox都没有问题
-* 经测试chromedriver无法满足需求，猜测是拦截了chromium webdriver的某些关键字
+* 经测试无法使用chromedriver进行代替，猜测是拦截了chromium webdriver的某些关键字
 
-## 配置
+## 环境
 
 * 使用conda配置环境：
 ``` shell
 conda env create -f environment.yml  
 ```
-* 根据 personal_info_demo.py 的注释添加自己的信息，选择合适的首选项，最后将 personal_info_demo.py 更名为 personal_info.py   
+* 根据 personal_info_demo.py 的注释添加自己的信息，选择合适的首选项，并根据首选项选填额外个人信息
+* 将 personal_info_demo.py 更名为 personal_info.py   
 
-``` python
-# 首选项
-preferences = {
-    # 浏览器无痕
-    "incognito_flag":True ,
-    # 浏览器无窗口
-    "headless_flag":True ,
-    # 是否发送邮件
-    "email_flag":False ,
-    # 每日平安打卡
-    "daily_report_flag":True ,
-    # 每日体温上报
-    "temp_report_flag":False ,
-    # 自动打卡
-    "report_flag":True ,
-    # 校园无线网断网重连
-    "campusnet_flag":True ,
-    # 宿舍有线网断网重连
-    "dormnet_flag":False ,
-}
-```
-
-* 运行主程序
+## 运行主程序
 
 windows下
 ``` shell
@@ -68,6 +53,11 @@ linux下
 source /home/***/anaconda3/bin/activate slider
 nohup python -u main.py > uestc_reportor.log 2>&1 &
 ```
+
+## 单独运行模块
+
+* 将需要运行的模块最后一段注释掉即可  
+* 等同于在首选项里只勾选单独的模块，所以不推荐单独运行模块
 
 ---
 
