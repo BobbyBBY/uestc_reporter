@@ -14,7 +14,6 @@ class Reportor(object):
         self.login_url = "http://10.253.0.213/srun_portal_success?ac_id=1&theme=pro"
         self.headless_flag = preferences["headless_flag"]  # 无窗口
         self.incognito_flag = preferences["incognito_flag"]  # 无痕
-        self.email_flag = preferences["email_flag"]  # 邮件
 
     def get_explorer(self):
         options = webdriver.firefox.options.Options()
@@ -22,7 +21,8 @@ class Reportor(object):
             options.add_argument("--headless")  # 无窗口
         if self.incognito_flag:
             options.add_argument("--incognito")  # 无痕
-        driver = webdriver.Firefox(executable_path=webdriver_path, options=options)
+        driver = webdriver.Firefox(
+            executable_path=webdriver_path, options=options)
         return driver
 
     # 登录校园无线网
@@ -67,8 +67,7 @@ class Reportor(object):
             else:
                 print("校园网登录账号 : {}".format(self.username))
                 n_time = datetime.now()
-                if self.email_flag:
-                    push(str(n_time) + " 校园网连上了 ^_^")
+                push(str(n_time) + " 校园网连上了 ^_^")
                 driver.quit()
                 return True
 
@@ -81,8 +80,7 @@ class Reportor(object):
             _login_campusnet(i + 1)
             if _check_login_campusnet():
                 return
-        if self.email_flag:
-            push_error("校园网登录失败，上服务器看看我觉得我还有救")
+        push_error("校园网登录失败，上服务器看看我觉得我还有救")
         raise RuntimeError("校园网登录失败")
 
     def isNetOK(self, testserver):
@@ -98,8 +96,7 @@ class Reportor(object):
         except Exception as e:
             n_time = datetime.now()
             print(str(n_time) + " campusnet offline")
-            if self.email_flag:
-                push_error(str(n_time) + " 校园网断了。。。")
+            push_error(str(n_time) + " 校园网断了。。。")
             return False
 
     def network_check(self):
