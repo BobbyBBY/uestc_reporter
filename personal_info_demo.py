@@ -10,28 +10,38 @@ preferences = {
     # 浏览器无窗口
     "headless_flag": True,
     # 是否发送邮件
-    "email_flag": False,
-    # 每日平安打卡
-    "daily_report_flag": True,
-    # 每日体温上报
-    "temp_report_flag": False,
-    # 自动打卡
+    "email_flag": True,
+
+    # 每日自动打卡
     "report_flag": True,
+    # 每日自动打卡-小时
+    # 【务必修改】避免大量人员同一时间打卡，0-23之间
+    "report_hour": 9,
+    # 每日自动打卡-分钟
+    # 0-59之间
+    "report_min": 11,
+    # 每日自动打卡-自动平安打卡
+    "daily_report_flag": True,
+    # 每日自动打卡-自动平安打卡-使用昨日信息
+    "daily_report_flag_from_yesterday": True,
+    # 每日自动打卡-自动体温上报
+    # 【勿动】
+    "temp_report_flag": False,
+
     # 校园无线网断网重连
+    # 请勿在非校园无线网环境开启，否则会进入死循环
     "campusnet_flag": True,
     # 宿舍有线网断网重连
+    # 请勿在非宿舍有线网环境开启，否则会进入死循环
     "dormnet_flag": False,
-    # 每日打卡时间-小时
-    "report_hour": 9,
-    # 每日打卡时间-分钟
-    "report_min": 13,
 }
 
 # ==================================选填项==================================
-# 根据email_flag、report_flag、daily_report_flag、temp_report_flag、campusnet_flag、dormnet_flag选填下列信息
+# 根据首选项选填下列信息
 # 带注释的项都需要修改
 
 # --------------------------------email_flag--------------------------------
+# 推荐使用阿里云邮件推送服务
 
 push_email_server = {
     # 推送域名
@@ -58,6 +68,8 @@ push_email_list = [{
 ]
 
 # ----------------------------daily_report_flag----------------------------
+# 如果启用 daily_report_flag_from_yesterday，则不用填写以下信息
+
 # 这里修改为你自己的信息，注释下的都需要修改
 # 多人打卡逻辑为登陆一个账号，打一次卡，请注意顺序
 # daily_report_data 和 daily_report_login_data 账户顺序需要一致
@@ -143,7 +155,7 @@ daily_report_data = [{
 ]
 
 # ----------------------------temp_report_flag----------------------------
-# 【已弃用】体温信息
+# 【已弃用】体温信息，不用填写
 # 不能单独填报体温，需要同时平安打卡和填报体温
 
 temp_report_data = []

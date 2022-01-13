@@ -7,13 +7,18 @@ channels:
   - http://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/win-64
   - http://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/win-64
 dependencies:
+  - appdirs=1.4.4=pyhd3eb1b0_0
   - apscheduler=3.6.3=py37_1
+  - attrs=21.2.0=pyhd3eb1b0_0
+  - autopep8=1.6.0=pyhd3eb1b0_0
+  - black=19.10b0=py_0
   - blas=1.0=mkl
   - brotlipy=0.7.0=py37h2bbff1b_1003
-  - ca-certificates=2021.1.19=haa95532_0
-  - certifi=2020.12.5=py37haa95532_0
+  - ca-certificates=2021.10.26=haa95532_2
+  - certifi=2021.10.8=py37haa95532_0
   - cffi=1.11.5=py37h74b6da3_1
   - chardet=4.0.0=py37haa95532_1003
+  - click=8.0.3=pyhd3eb1b0_0
   - cryptography=3.3.1=py37hcd4344a_0
   - cycler=0.10.0=py37_0
   - freetype=2.9.1=ha9979f8_1
@@ -28,9 +33,13 @@ dependencies:
   - mkl=2018.0.3=1
   - mkl_fft=1.0.6=py37hdbbee80_0
   - mkl_random=1.0.1=py37h77b88f5_1
+  - mypy_extensions=0.4.3=py37haa95532_1
+  - numpy-base=1.15.4=py37h8128ebf_0
   - olefile=0.46=py37_0
-  - openssl=1.1.1i=h2bbff1b_0
+  - openssl=1.1.1l=h2bbff1b_0
+  - pathspec=0.7.0=py_0
   - pip=20.3.3=py37haa95532_0
+  - pycodestyle=2.8.0=pyhd3eb1b0_0
   - pycparser=2.20=py_2
   - pyopenssl=20.0.1=pyhd3eb1b0_1
   - pyparsing=2.4.7=pyhd3eb1b0_0
@@ -41,6 +50,7 @@ dependencies:
   - pytorch=0.4.1=py37_cuda90_cudnn7he774522_1
   - pytz=2020.5=pyhd3eb1b0_0
   - qt=5.9.7=vc14h73c81de_0
+  - regex=2021.8.3=py37h2bbff1b_0
   - requests=2.25.1=pyhd3eb1b0_0
   - rope=0.18.0=py_0
   - setuptools=51.3.3=py37haa95532_4
@@ -50,8 +60,10 @@ dependencies:
   - tbb=2018.0.5=he980bc4_0
   - tbb4py=2018.0.5=py37he980bc4_0
   - tk=8.6.8=hfa6e2cd_0
+  - toml=0.10.2=pyhd3eb1b0_0
   - torchvision=0.2.1=py_2
   - tornado=5.1.1=py37hfa6e2cd_0
+  - typing_extensions=3.10.0.2=pyh06a4308_0
   - tzlocal=2.1=py37_0
   - urllib3=1.26.3=pyhd3eb1b0_0
   - vc=14.2=h21ff451_1
@@ -75,7 +87,6 @@ dependencies:
     - pyuserinput==0.1.10
     - pywin32==300
     - selenium==3.141.0
-    - toml==0.10.2
     - torchsummary==1.5.1
     - typed-ast==1.4.2
     - wrapt==1.12.1
