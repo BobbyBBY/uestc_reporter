@@ -1,7 +1,6 @@
 from my_request import get_request
 import json
 import re
-from datetime import datetime
 import time
 import slider
 
@@ -30,8 +29,9 @@ class Reportor(object):
         self.temp_report_save_url = "/jkdkapp/sys/lwReportEpidemicStu/mobile/tempReport/T_REPORT_TEMPERATURE_YJS_SAVE.do?"
         self.headless_flag = preferences["headless_flag"]  # 无窗口
         self.incognito_flag = preferences["incognito_flag"]  # 无痕
-        self.email_flag = preferences["email_flag"]  # 邮件
         self.daily_report_flag = preferences["daily_report_flag"]  # 每日平安打卡
+        # 使用昨日信息每日平安打卡
+        self.daily_report_from_yesterday_flag = preferences["daily_report_flag_from_yesterday"]
         self.temp_report_flag = preferences["temp_report_flag"]  # 每日体温上报
         self.headers = {"Cookie": ""}
 
@@ -41,14 +41,15 @@ class Reportor(object):
             options.add_argument("--headless")  # 无窗口
         if self.incognito_flag:
             options.add_argument("--incognito")  # 无痕
-        driver = webdriver.Firefox(executable_path=webdriver_path, options=options)
+        driver = webdriver.Firefox(
+            executable_path=webdriver_path, options=options)
         return driver
 
     # 登录GMIS
     def login_GMIS(self, user):
         self.username = self.login_data[user]["username"]
         self.password = self.login_data[user]["password"]
-        print("health_report logging in...\r", end="")
+        print("health_report logging in...")
         driver = self.get_explorer()
 
         def _login_GMIS(i):
@@ -71,10 +72,13 @@ class Reportor(object):
                 time.sleep(3)
 
                 # 获取滑块验证的两个图片
-                bigImg_base64 = driver.find_element_by_id("img1").get_attribute("src")
-                smallImg_base64 = driver.find_element_by_id("img2").get_attribute("src")
+                bigImg_base64 = driver.find_element_by_id(
+                    "img1").get_attribute("src")
+                smallImg_base64 = driver.find_element_by_id(
+                    "img2").get_attribute("src")
                 # 计算滑块需要滑动的距离
-                moveLengthScale = slider.findSliderX(bigImg_base64, smallImg_base64)
+                moveLengthScale = slider.findSliderX(
+                    bigImg_base64, smallImg_base64)
                 # 应该动态获取幕布宽度，但其实写死了
                 # canvasLength =
                 canvasLength = 280
@@ -148,94 +152,158 @@ class Reportor(object):
             _login_GMIS(i + 1)
             if _check_login_GMIS():
                 return
-        if self.email_flag:
-            push_error("GMIS登录失败，上服务器看看我觉得我还有救")
+        push_error("GMIS登录失败，上服务器看看我觉得我还有救")
         raise RuntimeError("GMIS登录失败")
 
     # 每日平安打卡
-    def daily_report(self, NEED_DATE, daily_report_data):
-        def _daily_report(NEED_DATE, daily_report_data):
-            # 获取WID
-            wid_data = {
-                "pageNumber": "1",
-                "pageSize": "10",
-                "USER_ID": daily_report_data["USER_ID"],
-            }
-            res = get_request(self.host, "POST", self.wid_url, wid_data, self.headers)
-            if re.search("<title>统一身份认证</title>", res):
-                raise RuntimeError("Cookie失效")
-            elif re.search("<title>302 Found</title>", res):
-                raise RuntimeError("Cookie失效")
-            try:
-                wid_json_loads = json.loads(res)
-                wid = wid_json_loads["datas"]["getMyTodayReportWid"]["rows"][0]["WID"]
-                daily_report_data["WID"] = wid
-            except json.decoder.JSONDecodeError:
-                print("json解析失败")
-                return 1
+    def daily_report(self, user, daily_report_data):
+        def _daily_report(user, daily_report_data):
+            if self.daily_report_from_yesterday_flag:
+                # 获取WID
+                wid_data = {
+                    'pageNumber': '1',
+                    'pageSize': '10',
+                    'USER_ID': self.login_data[user]["username"],
+                }
+                res = get_request(self.host, "POST",
+                                  self.wid_url, wid_data, self.headers)
+                if re.search("<title>统一身份认证</title>", res):
+                    raise RuntimeError("Cookie失效")
+                elif re.search("<title>302 Found</title>", res):
+                    raise RuntimeError("Cookie失效")
 
-            # check
-            check_data = {
-                "pageNumber": "1",
-                "pageSize": "10",
-                "USER_ID": daily_report_data["USER_ID"],
-                "KSRQ": NEED_DATE,
-                "JSRQ": NEED_DATE,
-            }
-            res = get_request(
-                self.host, "POST", self.daily_report_check_url, check_data, self.headers
-            )
-            if re.search("<title>统一身份认证</title>", res):
-                raise RuntimeError("Cookie失效")
-            elif re.search("<title>302 Found</title>", res):
-                raise RuntimeError("Cookie失效")
-            try:
+                orig_data = json.loads(res)
+                wid = orig_data['datas']['getMyTodayReportWid']['rows'][0]['WID']
+                # check
+                date = utils.get_date()
+                check_data = {
+                    'pageNumber': '1',
+                    'pageSize': '10',
+                    'USER_ID': self.login_data[user]["username"],
+                    'KSRQ': date,
+                    'JSRQ': date,
+                }
+                res = get_request(
+                    self.host, "POST", self.daily_report_check_url, check_data, self.headers)
+                if re.search("<title>统一身份认证</title>", res):
+                    raise RuntimeError("Cookie失效")
+                elif re.search("<title>302 Found</title>", res):
+                    raise RuntimeError("Cookie失效")
                 parsed_res = json.loads(res)
-            except json.decoder.JSONDecodeError:
-                print("json解析失败")
-                return 1
-            try:
-                if parsed_res["datas"]["getMyDailyReportDatas"]["totalSize"] > 0:
-                    print("daily report has finished")
+                if parsed_res['datas']['getMyDailyReportDatas']['totalSize'] > 0:
                     return 0  # 打卡成功
-            except KeyError:
-                pass
 
-            # save
-            daily_report_data.update(
-                {"NEED_CHECKIN_DATE": NEED_DATE, "CZRQ": NEED_DATE + " 00:00:00",}
-            )
-            res = get_request(
-                self.host,
-                "POST",
-                self.daily_report_save_url,
-                daily_report_data,
-                self.headers,
-            )
-            if re.search("<title>统一身份认证</title>", res):
-                raise RuntimeError("Cookie失效")
-            elif re.search("<title>302 Found</title>", res):
-                raise RuntimeError("Cookie失效")
-            try:
+                # save
+                yesterday = utils.get_yesterday()
+                check_data['KSRQ'] = yesterday
+                check_data['JSRQ'] = yesterday
+                res = get_request(
+                    self.host, "POST", self.daily_report_check_url, check_data, self.headers)
+                report_history = json.loads(res)
+                report_item = report_history['datas']['getMyDailyReportDatas']['rows'][0]
+                datetime = utils.get_datetime()
+                report_item["CZRQ"] = datetime
+                report_item['WID'] = wid
+                report_item['NEED_CHECKIN_DATE'] = date
+                report_item['CREATED_AT'] = datetime
+
+                res = get_request(
+                    self.host, "POST", self.daily_report_save_url, report_item, self.headers)
+                if re.search("<title>统一身份认证</title>", res):
+                    raise RuntimeError("Cookie失效")
+                elif re.search("<title>302 Found</title>", res):
+                    raise RuntimeError("Cookie失效")
                 parsed_res = json.loads(res)
-            except json.decoder.JSONDecodeError:
-                print("json解析失败")
-                return 1
-            if (
-                parsed_res["code"] == "0"
-                and parsed_res["datas"]["T_REPORT_EPIDEMIC_CHECKIN_YJS_SAVE"] == 1
-            ):
-                print("daily report sucessful")
-                return 0  # 打卡成功
+                if parsed_res['code'] == '0' and parsed_res['datas']['T_REPORT_EPIDEMIC_CHECKIN_YJS_SAVE'] == 1:
+                    print("Daily report successful")
+                    return 0  # 打卡成功
+                else:
+                    print("打卡失败")
+                    return 1
             else:
-                print("打卡失败")
-                return 1
+                NEED_DATE = utils.get_date()
+                # 获取WID
+                wid_data = {
+                    "pageNumber": "1",
+                    "pageSize": "10",
+                    "USER_ID": daily_report_data["USER_ID"],
+                }
+                res = get_request(self.host, "POST", self.wid_url,
+                                  wid_data, self.headers)
+                if re.search("<title>统一身份认证</title>", res):
+                    raise RuntimeError("Cookie失效")
+                elif re.search("<title>302 Found</title>", res):
+                    raise RuntimeError("Cookie失效")
+                try:
+                    wid_json_loads = json.loads(res)
+                    wid = wid_json_loads["datas"]["getMyTodayReportWid"]["rows"][0]["WID"]
+                    daily_report_data["WID"] = wid
+                except json.decoder.JSONDecodeError:
+                    print("json解析失败")
+                    return 1
+
+                # check
+                check_data = {
+                    "pageNumber": "1",
+                    "pageSize": "10",
+                    "USER_ID": daily_report_data["USER_ID"],
+                    "KSRQ": NEED_DATE,
+                    "JSRQ": NEED_DATE,
+                }
+                res = get_request(
+                    self.host, "POST", self.daily_report_check_url, check_data, self.headers
+                )
+                if re.search("<title>统一身份认证</title>", res):
+                    raise RuntimeError("Cookie失效")
+                elif re.search("<title>302 Found</title>", res):
+                    raise RuntimeError("Cookie失效")
+                try:
+                    parsed_res = json.loads(res)
+                except json.decoder.JSONDecodeError:
+                    print("json解析失败")
+                    return 1
+                try:
+                    if parsed_res["datas"]["getMyDailyReportDatas"]["totalSize"] > 0:
+                        print("daily report has finished")
+                        return 0  # 打卡成功
+                except KeyError:
+                    pass
+
+                # save
+                daily_report_data.update(
+                    {"NEED_CHECKIN_DATE": NEED_DATE,
+                        "CZRQ": NEED_DATE + " 00:00:00", }
+                )
+                res = get_request(
+                    self.host,
+                    "POST",
+                    self.daily_report_save_url,
+                    daily_report_data,
+                    self.headers,
+                )
+                if re.search("<title>统一身份认证</title>", res):
+                    raise RuntimeError("Cookie失效")
+                elif re.search("<title>302 Found</title>", res):
+                    raise RuntimeError("Cookie失效")
+                try:
+                    parsed_res = json.loads(res)
+                except json.decoder.JSONDecodeError:
+                    print("json解析失败")
+                    return 1
+                if (
+                    parsed_res["code"] == "0"
+                    and parsed_res["datas"]["T_REPORT_EPIDEMIC_CHECKIN_YJS_SAVE"] == 1
+                ):
+                    print("daily report sucessful")
+                    return 0  # 打卡成功
+                else:
+                    print("打卡失败")
+                    return 1
 
         try:
-            return _daily_report(NEED_DATE, daily_report_data)
+            return _daily_report(user, daily_report_data)
         except RuntimeError as e:
-            if self.email_flag:
-                push_error(str(e) + "，上服务器看看我觉得我还有救")
+            push_error(str(e) + "，上服务器看看我觉得我还有救")
             exit(0)
         except Exception:
             return 1
@@ -257,7 +325,8 @@ class Reportor(object):
                 raise RuntimeError("Cookie失效")
             if (
                 re.search(
-                    '"NEED_DATE":"{}","DAY_TIME":"{}"'.format(NEED_DATE, DAY_TIME), res
+                    '"NEED_DATE":"{}","DAY_TIME":"{}"'.format(
+                        NEED_DATE, DAY_TIME), res
                 )
                 is not None
             ):
@@ -305,33 +374,33 @@ class Reportor(object):
         try:
             return _temp_report(NEED_DATE, DAY_TIME, temp_report_data)
         except RuntimeError as e:
-            if self.email_flag:
-                push_error(str(e) + "，上服务器看看我觉得我还有救")
+            push_error(str(e) + "，上服务器看看我觉得我还有救")
             exit(0)
         except Exception:
             return 1
 
     # 打卡自动化
     def daily_check(self):
-        def _daily_check(user, daily_report_data, temp_report_data, date_str=None):
+        def _daily_check(user, daily_report_data, temp_report_data):
+            date_str = utils.get_date()
+
             # 登录
             self.login_GMIS(user)
 
-            if date_str is None:
-                date_str = datetime.now().strftime("%Y-%m-%d")
-                print("当前时间 : " + str(datetime.now()))
             # 平安打卡
             if self.daily_report_flag:
-                while self.daily_report(date_str, daily_report_data):
+                while self.daily_report(user, daily_report_data):
                     continue
-            # 每日体温上报
-            if self.temp_report_flag:
-                r_value_list = []
-                for id in range(1, 4):
-                    while id not in r_value_list:
-                        r_value_list.append(
-                            self.temp_report(date_str, str(id), temp_report_data)
-                        )
+            # # 每日体温上报
+            # 【已弃用】未维护
+            # if self.temp_report_flag:
+            #     r_value_list = []
+            #     for id in range(1, 4):
+            #         while id not in r_value_list:
+            #             r_value_list.append(
+            #                 self.temp_report(date_str, str(id), temp_report_data)
+            #             )
+
             # 打卡全部完成
             print(
                 "{} day {} report complete!\n".format(
@@ -345,8 +414,7 @@ class Reportor(object):
             date_str = _daily_check(
                 user, daily_report_data[user], temp_report_data[user]
             )
-        if self.email_flag:
-            push(date_str + " 打卡完成")
+        push(date_str + " 打卡完成")
 
 
 # # 自动打卡

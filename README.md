@@ -18,7 +18,7 @@ Forked from https://github.com/onion-rain/uestc_health_report
 * 统一身份认证滑块验证码的破解  
 * 打卡自动化  
 * 宿舍有线网、校园无线网守护  
-
+* 使用昨日信息打卡，避免信息修改导致重启程序  
 
 
 ---
@@ -27,7 +27,7 @@ Forked from https://github.com/onion-rain/uestc_health_report
 
 ## geckodriver
 
-* 需要下载firefox浏览器的[geckodriver](https://github.com/mozilla/geckodriver/releases)  
+* 需要下载firefox浏览器，以及对应的[geckodriver](https://github.com/mozilla/geckodriver/releases)  
 * 根据自己的操作系统，下载对应的.gz或.zip文件，解压后放进项目文件夹
 * 经测试，在windows、linux（包括命令行，即浏览器无窗口模式）下使用firefox都没有问题
 * 经测试无法使用chromedriver进行代替，猜测是拦截了chromium webdriver的某些关键字
@@ -111,6 +111,12 @@ nohup python -u main.py > uestc_reportor.log 2>&1 &
 ![email2](readme_imgs/email2.png)  
 ![email3](readme_imgs/email3.png)  
 
+## 使用昨日信息打卡
+
+* 读取昨日打卡信息，填报今日打卡信息
+* 多人打卡更方便
+* 如需修改信息，请在每日自动打卡前手动打卡一次
+
 ---
 
 # 版本说明
@@ -125,3 +131,4 @@ nohup python -u main.py > uestc_reportor.log 2>&1 &
 * 2021.09 一人登陆多人打卡bug已修复，改为登陆一人打卡一次  
 * 2021.12 绕过滑块验证码的漏洞已修复，现加入边缘检测破解算法  
 * 2022.01 宿舍有线网、校园无线网网络守护  
+* 2022.01 使用昨日信息打卡，避免信息修改导致重启程序（来自源仓库）

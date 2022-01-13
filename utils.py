@@ -1,6 +1,7 @@
 import sys
 import traceback
 import push_server
+import datetime
 
 
 def printError():
@@ -19,3 +20,13 @@ def cookies2str(cookies):
     cookie = [item["name"] + "=" + item["value"] for item in cookies]
     cookiestr = ";".join(item for item in cookie)
     return cookiestr
+
+def get_date():
+    return datetime.datetime.now().strftime("%Y-%m-%d")
+
+def get_yesterday():
+    yesterday = datetime.datetime.today() + datetime.timedelta(-1)
+    return yesterday.strftime("%Y-%m-%d")
+
+def get_datetime():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
