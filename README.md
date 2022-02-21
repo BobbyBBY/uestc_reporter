@@ -34,21 +34,28 @@ Forked from https://github.com/onion-rain/uestc_health_report
 
 ## 环境
 
-* 使用conda配置环境：
+* windows环境
 ``` shell
-conda env create -f environment.yml  
+conda env create -f env-win.yml
 ```
+* linux环境
+``` bash
+conda env create -f env-linux.yml
+```
+
+## 程序首选项
+
 * 根据 personal_info_demo.py 的注释添加自己的信息，选择合适的首选项，并根据首选项选填额外个人信息
 * 将 personal_info_demo.py 更名为 personal_info.py   
 
 ## 运行主程序
 
-windows下
+* windows环境
 ``` shell
 activate slider
 python main.py
 ```
-linux下
+* linux环境
 ``` bash
 source /home/***/anaconda3/bin/activate slider
 nohup python -u main.py > uestc_reportor.log 2>&1 &
@@ -84,7 +91,7 @@ nohup python -u main.py > uestc_reportor.log 2>&1 &
 ![slider1](readme_imgs/slider-small-1.png)  
 ![slider2](readme_imgs/slider-small-2.png)  
 
-* 提取背景灰度图，进行边缘检测，从左至右扫描直线，
+* 提取背景灰度图，进行边缘检测，从左至右扫描竖线
   
 ![slider3](readme_imgs/slider-big-1.png)  
 ![slider4](readme_imgs/slider-big-2.png)  
@@ -131,4 +138,5 @@ nohup python -u main.py > uestc_reportor.log 2>&1 &
 * 2021.09 一人登陆多人打卡bug已修复，改为登陆一人打卡一次  
 * 2021.12 绕过滑块验证码的漏洞已修复，现加入边缘检测破解算法  
 * 2022.01 宿舍有线网、校园无线网网络守护  
-* 2022.01 使用昨日信息打卡，避免信息修改导致重启程序（来自源仓库）
+* 2022.01 使用昨日信息打卡，避免信息修改导致重启程序（更新自fork前的源仓库）
+* 2022.02 区分 win\linux 环境配置文件
