@@ -7,8 +7,9 @@ Forked from https://github.com/onion-rain/uestc_health_report
 
 ## 功能
 
-* 每日平安打卡  
-* 每日体温上报【已停用】  
+* 每日循环任务  
+* 自动平安打卡
+* 自动体温上报【已停用】  
 * 宿舍有线网自动连接  
 * 校园无线网自动连接  
 * 阿里云邮件推送配置  
@@ -25,12 +26,12 @@ Forked from https://github.com/onion-rain/uestc_health_report
 
 # 配置
 
-## geckodriver
+## 浏览器及驱动
 
 * 需要下载firefox浏览器，以及对应的[geckodriver](https://github.com/mozilla/geckodriver/releases)  
 * 根据自己的操作系统，下载对应的.gz或.zip文件，解压后放进项目文件夹
 * 经测试，在windows、linux（包括命令行，即浏览器无窗口模式）下使用firefox都没有问题
-* 经测试无法使用chromedriver进行代替，猜测是拦截了chromium webdriver的某些关键字
+* 经测试无法使用chromium系列浏览器及chromedriver，猜测是拦截了chromium webdriver的某些关键字
 
 ## 环境
 
@@ -70,7 +71,7 @@ nohup python -u main.py > uestc_reportor.log 2>&1 &
 
 # 实现思路
 
-## 每日平安打卡、每日体温填报
+## 自动平安打卡、自动体温填报
 
 * 通过chrome的develop tools的network, 在每日打卡填报时候进行抓包，找到进行每日报平安以及体温上报的api。
 * 首先在postman中测试直接请求api是否可行，发现只需要带个人cookie以及报平安以及体温的参数即可。

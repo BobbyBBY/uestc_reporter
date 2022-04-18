@@ -5,33 +5,43 @@ webdriver_path = r"D:/geckodriver.exe"
 
 # 首选项
 preferences = {
-    # 浏览器无痕
+    # 浏览器无痕，推荐 True
     "incognito_flag": True,
-    # 浏览器无窗口
-    "headless_flag": True,
-    # 是否发送邮件
-    "email_flag": True,
 
-    # 每日自动打卡
-    "report_flag": True,
-    # 每日自动打卡-小时
+    # 浏览器无窗口，推荐 True
+    "headless_flag": True,
+
+    # 是否发送邮件，推荐 False 。若为 True ，需修改选填项的 push_email_server 和 push_email_list
+    "email_flag": False,
+
+
+    # 每日循环任务，推荐 False 。若为 True ，需修改必填项的 report_hour 和 report_min
+    "report_flag": False,
+
+    # 每日循环任务-小时
     # 【务必修改】避免大量人员同一时间打卡，0-23之间
     "report_hour": 9,
-    # 每日自动打卡-分钟
+
+    # 每日循环任务-分钟
     # 0-59之间
     "report_min": 11,
-    # 每日自动打卡-自动平安打卡
-    "daily_report_flag": True,
-    # 每日自动打卡-自动平安打卡-使用昨日信息
+
+    # 每日循环任务-自动平安打卡，推荐 False 
+    # 若为 True 且 daily_report_flag_from_yesterday 为 False ，需修改选填项的 daily_report_login_data 和 daily_report_data
+    "daily_report_flag": False,
+
+    # 每日循环任务-自动平安打卡-使用昨日信息，推荐 True
     "daily_report_flag_from_yesterday": True,
-    # 每日自动打卡-自动体温上报
-    # 【勿动】
+
+    #【已停用，勿动】 每日循环任务-自动体温上报
     "temp_report_flag": False,
 
-    # 校园无线网断网重连
+
+    # 校园无线网断网重连，推荐 False 。若为True，需修改选填项的 campusnet_login_data
     # 请勿在非校园无线网环境开启，否则会进入死循环
-    "campusnet_flag": True,
-    # 宿舍有线网断网重连
+    "campusnet_flag": False,
+
+    # 宿舍有线网断网重连，推荐 False 。若为True，需修改选填项的 dormnet_login_data
     # 请勿在非宿舍有线网环境开启，否则会进入死循环
     "dormnet_flag": False,
 }
@@ -140,8 +150,10 @@ daily_report_data = [{
     "IS_SEE_DOCTOR": "NO",
     "IS_IN_SCHOOL_DISPLAY": "是",
     "IS_IN_SCHOOL": "1",
-    "TF_HEALTH_CODE": "1",  # 天府健康通，1表示“绿码”，其余情况不确定，猜测是2、3
-    "VACCINATION": "1",  # 疫苗接种情况，1表示“以全程接种”，其余情况不确定，猜测是2、3、4
+    # 天府健康通，1表示“绿码”，其余情况不确定，猜测是2、3
+    "TF_HEALTH_CODE": "1",
+    # 疫苗接种情况，1表示“已全程接种”，其余情况不确定，猜测是2、3、4
+    "VACCINATION": "1",
     "MEMBER_HEALTH_STATUS_CODE_DISPLAY": "正常",
     "MEMBER_HEALTH_STATUS_CODE": "001",
     "MEMBER_HEALTH_UNSUAL_CODE_DISPLAY": "",
@@ -155,7 +167,7 @@ daily_report_data = [{
 ]
 
 # ----------------------------temp_report_flag----------------------------
-# 【已弃用】体温信息，不用填写
+# 【已停用】体温信息，不用填写
 # 不能单独填报体温，需要同时平安打卡和填报体温
 
 temp_report_data = []
