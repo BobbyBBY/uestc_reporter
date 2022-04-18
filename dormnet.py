@@ -2,6 +2,7 @@ from datetime import datetime
 import time
 import socket
 import threading
+import os
 
 from push_server import push, push_error
 from selenium import webdriver
@@ -116,7 +117,7 @@ class Reportor(object):
             print(str(n_time) + " 宿舍有线网守护已开启")
             while True:
                 self.network_check()
-                time.sleep(60 * 5)  # 10分钟检查一次网络
+                time.sleep(60 * 5)  # 5分钟检查一次网络
                 """
                 # test
                 time.sleep(15)
@@ -133,4 +134,5 @@ class Reportor(object):
 # # 宿舍有线网断网重连
 # reportor = Reportor()
 # reportor.auto_login_dormnet()
-# input()
+# while(True):
+#     pass

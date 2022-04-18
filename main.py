@@ -5,6 +5,8 @@ import campusnet
 import dormnet
 import health_report
 import utils
+import time
+import os
 
 
 if __name__ == "__main__":
@@ -37,6 +39,7 @@ if __name__ == "__main__":
             push("uestc_health \njob started")
             scheduler_health_report.start()
 
-        input()
+        while(True):
+            time.sleep(24*60*60)
     except:
         utils.printError()
